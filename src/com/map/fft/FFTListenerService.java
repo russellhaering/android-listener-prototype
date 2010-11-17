@@ -34,6 +34,7 @@ public class FFTListenerService extends Service {
 	private int SAMPLE_RATE = 22050;
 	private int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
 	private int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+	private int BYTES_PER_FRAME = 2;
 	private int BUFFER_SIZE_FACTOR = 32;
 	private int bufSize;
 	private AudioRecord micRecord;
@@ -97,16 +98,16 @@ public class FFTListenerService extends Service {
 	private Runnable micStopper = new Runnable() {
 		@Override
 		public void run() {
-			synchronized (micRecord) {
-				micRecord.stop();
-				micRecord.release();
-				micRecord = null;
-				Looper.myLooper().quit();
-			}
+			micRecord.stop();
+			micRecord.release();
+			micRecord = null;
+			Looper.myLooper().quit();
 		}
 	};
 
 	private Thread micThread = new Thread() {
+		private short audioBuffer[];
+
 		@Override
 		public void run() {
 			Looper.prepare();
@@ -116,18 +117,18 @@ public class FFTListenerService extends Service {
 			bufSize = BUFFER_SIZE_FACTOR *
 				AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
 
+			audioBuffer = new short[bufSize];
+
 			micRecord = new AudioRecord(AUDIO_SOURCE,
 				SAMPLE_RATE,
 				CHANNEL_CONFIG,
 				AUDIO_FORMAT,
 				bufSize);
 
-			synchronized (micRecord) {
-				micRecord.setRecordPositionUpdateListener(micBufferListener, micHandler);
-				micRecord.setPositionNotificationPeriod(bufSize / 2);
-				micRecord.startRecording();
-				micRecord.read(new short[bufSize], 0, bufSize);
-			}
+			micRecord.setRecordPositionUpdateListener(micBufferListener, micHandler);
+			micRecord.setPositionNotificationPeriod(bufSize / BYTES_PER_FRAME);
+			micRecord.startRecording();
+			micRecord.read(audioBuffer, 0, bufSize);
 
 			Looper.loop();
 		}
@@ -140,12 +141,8 @@ public class FFTListenerService extends Service {
 
 			@Override
 			public void onPeriodicNotification(AudioRecord recorder) {
-				Log.i(TAG, "Period Callback Fired");
-				short audioBuffer[] = new short[bufSize];
-				synchronized (micRecord) {
-					micRecord.read(audioBuffer, 0, bufSize);
-					Log.i(TAG, "Completed Read");
-				}
+				micRecord.read(audioBuffer, 0, bufSize);
+				Log.i(TAG, "Completed Read, First Byte = " + audioBuffer[0]);
 			}
 		};
 	};
