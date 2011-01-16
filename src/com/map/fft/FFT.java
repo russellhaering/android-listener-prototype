@@ -2,27 +2,26 @@ package com.map.fft;
 
 public class FFT {
 
-	public static float[] realFFT(float datain[], int start, int len) {
+	public static int[] realFFT(short datain[], int start, int len) {
+		// TODO: This whole thing is horribly inefficient
 		int i;
+		int data[] = new int[len];
+		float fdata[] = new float[len * 2];
 
-		float data[] = new float[len * 2];
+		// Build an array of complex floats
 		for (i = 0; i < len; i++) {
-			data[2 * i] = datain[start + i];
-			data[2 * i + 1] = 0.0f;
+			fdata[2 * i] = datain[start + i];
+			// TODO: This may not be necessary
+			fdata[2 * i + 1] = 0;
 		}
 
-		return doFFT(data, 1);
+		fdata = doFFT(fdata);
 
-	}
+		for (i = 0; i < len; i++) {
+			data[i] = (int) fdata[i * 2];
+		}
 
-	public static float[] iFFT(float datain[]) {
-		int i, n;
-		float retval[] = doFFT(datain, -1);
-		n = retval.length;
-		for (i = 0; i < n; i++)
-			retval[i] = 2 * retval[i] / n;
-
-		return retval;
+		return data;
 	}
 
 	/**
@@ -36,11 +35,9 @@ public class FFT {
 	 *
 	 * @param datain
 	 *            The data input array
-	 * @param isign
-	 *            The sign of the imaginary domain
-	 * @return Returns the data array in accordance with isign
+	 * @return Returns the resulting array
 	 */
-	private static float[] doFFT(float datain[], int isign) {
+	private static float[] doFFT(float datain[]) {
 		int n = datain.length;
 		float data[] = new float[n];
 		int mmax, m, j, istep, i;
@@ -51,14 +48,12 @@ public class FFT {
 
 		// This is the bit-reversal section of the routine.
 		for (i = 0; i < n - 1; i += 2) {
+
+			// Swap the real parts. The complex parts are both 0 and needn't
+			// be swapped
 			if (j >= i) {
-				// SWAP(data, j, i);
 				data[j] = datain[i];
 				data[i] = datain[j];
-				// Exchange the two complex numbers.
-				// SWAP(data, j + 1, i + 1);
-				data[j + 1] = datain[i + 1];
-				data[i + 1] = datain[j + 1];
 			}
 			m = n / 2;
 			while (m >= 2 && j >= m) {
@@ -71,11 +66,12 @@ public class FFT {
 
 		// Here begins the Danielson - Lanczos section of the routine.
 		mmax = 2;
+
 		// Outer loop executed log2 nn times.
 		while (n > mmax) {
 			istep = mmax * 2;
 			// Initialize the trigonometric recurrence.
-			theta = isign * (2 * Math.PI / mmax);
+			theta = (2 * Math.PI / mmax);
 			wpr = Math.cos(theta);
 
 			wpi = Math.sin(theta);
@@ -101,13 +97,5 @@ public class FFT {
 		}
 
 		return data;
-	}
-
-	static void swapVals(float data[], int i, int j) {
-		float temp;
-
-		temp = data[i];
-		data[i] = data[j];
-		data[j] = temp;
 	}
 };

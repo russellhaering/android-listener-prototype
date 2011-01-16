@@ -35,8 +35,7 @@ public class FFTListenerService extends Service {
 	private int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
 	private int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
 	private int BYTES_PER_FRAME = 2;
-	private int BUFFER_SIZE_FACTOR = 32;
-	private int bufSize;
+	private int BUFFER_SIZE = 4096 * 16 * 8;
 	private AudioRecord micRecord;
 	private Handler micHandler;
 
@@ -114,21 +113,20 @@ public class FFTListenerService extends Service {
 
 			micHandler = new Handler();
 
-			bufSize = BUFFER_SIZE_FACTOR *
-				AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
+			Log.i(TAG, "Buffer Size = " + BUFFER_SIZE);
 
-			audioBuffer = new short[bufSize];
+			audioBuffer = new short[BUFFER_SIZE];
 
 			micRecord = new AudioRecord(AUDIO_SOURCE,
 				SAMPLE_RATE,
 				CHANNEL_CONFIG,
 				AUDIO_FORMAT,
-				bufSize);
+				BUFFER_SIZE);
 
 			micRecord.setRecordPositionUpdateListener(micBufferListener, micHandler);
-			micRecord.setPositionNotificationPeriod(bufSize / BYTES_PER_FRAME);
+			micRecord.setPositionNotificationPeriod(BUFFER_SIZE / BYTES_PER_FRAME);
 			micRecord.startRecording();
-			micRecord.read(audioBuffer, 0, bufSize);
+			micRecord.read(audioBuffer, 0, BUFFER_SIZE);
 
 			Looper.loop();
 		}
@@ -141,8 +139,17 @@ public class FFTListenerService extends Service {
 
 			@Override
 			public void onPeriodicNotification(AudioRecord recorder) {
-				micRecord.read(audioBuffer, 0, bufSize);
+				micRecord.read(audioBuffer, 0, BUFFER_SIZE);
 				Log.i(TAG, "Completed Read, First Byte = " + audioBuffer[0]);
+
+				int[] vals = FFT.realFFT(audioBuffer, 0, BUFFER_SIZE);
+				String valText = "Values: [";
+				for (int i = 0; i < 9; i++) {
+					valText += vals[i] + ", ";
+				}
+				valText += vals[10] + "...]";
+				Log.i(TAG, "Completed FFT");
+				Log.i(TAG, valText);
 			}
 		};
 	};
