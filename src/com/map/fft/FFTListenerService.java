@@ -34,10 +34,10 @@ public class FFTListenerService extends Service {
 	private int SAMPLE_RATE = 22050;
 	private int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
 	private int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
-	private int BYTES_PER_FRAME = 2;
-	private int BUFFER_SIZE = 4096 * 16 * 8;
+	private int BUFFER_SIZE = 4096 * 4;
 	private AudioRecord micRecord;
 	private Handler micHandler;
+	private int CHUNK_SIZE = 4096;
 
 	@Override
 	public void onCreate() {
@@ -106,10 +106,13 @@ public class FFTListenerService extends Service {
 
 	private Thread micThread = new Thread() {
 		private short audioBuffer[];
+		private FFTSignalDatabase db;
 
 		@Override
 		public void run() {
 			Looper.prepare();
+
+			db = new FFTSignalDatabase();
 
 			micHandler = new Handler();
 
@@ -121,10 +124,10 @@ public class FFTListenerService extends Service {
 				SAMPLE_RATE,
 				CHANNEL_CONFIG,
 				AUDIO_FORMAT,
-				BUFFER_SIZE);
+				BUFFER_SIZE * 2);
 
 			micRecord.setRecordPositionUpdateListener(micBufferListener, micHandler);
-			micRecord.setPositionNotificationPeriod(BUFFER_SIZE / BYTES_PER_FRAME);
+			micRecord.setPositionNotificationPeriod(BUFFER_SIZE);
 			micRecord.startRecording();
 			micRecord.read(audioBuffer, 0, BUFFER_SIZE);
 
@@ -142,14 +145,16 @@ public class FFTListenerService extends Service {
 				micRecord.read(audioBuffer, 0, BUFFER_SIZE);
 				Log.i(TAG, "Completed Read, First Byte = " + audioBuffer[0]);
 
-				int[] vals = FFT.realFFT(audioBuffer, 0, BUFFER_SIZE);
-				String valText = "Values: [";
-				for (int i = 0; i < 9; i++) {
-					valText += vals[i] + ", ";
+				for (int i = 0; i < BUFFER_SIZE; i += CHUNK_SIZE) {
+					int max = -1;
+					int maxIdx = -1;
+					int[] vals = FFT.realFFT(audioBuffer, i, CHUNK_SIZE);
+					FFTSignal sig = db.searchChunk(vals);
+					if (sig != null) {
+						Log.i(TAG, "DETECTED: " + sig.getName());
+					}
 				}
-				valText += vals[10] + "...]";
-				Log.i(TAG, "Completed FFT");
-				Log.i(TAG, valText);
+				Log.i(TAG, "Done");
 			}
 		};
 	};
