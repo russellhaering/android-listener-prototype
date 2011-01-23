@@ -28,6 +28,11 @@ public class FFTControlActivity extends Activity {
 		((FFTApplication) getApplicationContext()).addFFTServiceStatusListener(fftStatusListener);
 
 		listenerServiceIntent = new Intent(getApplicationContext(), FFTListenerService.class);
+
+		// TODO: Get rid of this later
+		//Intent alertIntent = new Intent(this, FFTAlertActivity.class);
+		//alertIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		//getApplication().startActivity(alertIntent);
     }
 
 	@Override
@@ -36,24 +41,24 @@ public class FFTControlActivity extends Activity {
 		((FFTApplication) getApplicationContext()).removeFFTServiceStatusListener(fftStatusListener);
 	}
 
-    private OnClickListener ctlButtonListener = new OnClickListener() {
-    	@Override
-		public void onClick(View v) {
-    		FFTServiceStatus s = ((FFTApplication) getApplicationContext()).getFFTServiceStatus();
-    		switch (s) {
-    		case STOPPED:
-        		startService(listenerServiceIntent);
-        		break;
-    		case STARTED:
-    			stopService(listenerServiceIntent);
-    			break;
-    		}
-    	}
-    };
-
-    private ServiceStatusListener fftStatusListener = new ServiceStatusListener() {
+	private OnClickListener ctlButtonListener = new OnClickListener() {
 		@Override
-		public void onServiceStatusUpdate(FFTServiceStatus status) {
+		public void onClick(View v) {
+			Status s = ((FFTApplication) getApplicationContext()).getFFTServiceStatus();
+			switch (s) {
+				case STOPPED:
+					startService(listenerServiceIntent);
+					break;
+				case STARTED:
+					stopService(listenerServiceIntent);
+					break;
+			}
+		}
+	};
+
+    private StatusListener fftStatusListener = new StatusListener() {
+		@Override
+		public void onServiceStatusUpdate(Status status) {
 			switch (status) {
 			case STOPPED:
 				ctlButton.setText(BUTTON_START_STRING);

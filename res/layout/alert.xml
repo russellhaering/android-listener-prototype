@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<TextView
+		android:id="@+id/alertTopArea"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_weight="1"
+		android:gravity="center_vertical|center_horizontal"
+		android:background="#F00"
+		android:color="#FFFF"
+		android:textSize="52dip"
+		android:textStyle="bold"
+		android:text="Take Cover!" />
+	<View
+		android:id="@+id/alertBottomArea"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_weight="1"
+		android:background="#FFF" />
+</LinearLayout>

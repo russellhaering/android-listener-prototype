@@ -1,6 +1,6 @@
 package com.map.fft;
 
-public enum FFTServiceStatus {
+public enum Status {
 	STOPPED,
 	STARTED,
 }

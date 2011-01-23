@@ -18,9 +18,15 @@
 					android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
+		<activity
+			android:name=".FFTAlertActivity"
+			android:label="@string/app_name">
+		</activity>
 		<service
 			android:name=".FFTListenerService" />
 	</application>
 	<uses-permission
 		android:name="android.permission.RECORD_AUDIO"></uses-permission>
+	<uses-permission
+		android:name="android.permission.VIBRATE"></uses-permission>
 </manifest>

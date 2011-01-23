@@ -6,25 +6,46 @@ import java.util.List;
 import android.app.Application;
 
 public class FFTApplication extends Application {
-	private FFTServiceStatus fftServiceStatus = FFTServiceStatus.STOPPED;
-	private List<ServiceStatusListener> fftServiceStatusListeners = new ArrayList<ServiceStatusListener>();
+	private Status fftServiceStatus = Status.STOPPED;
+	private Status fftAlertStatus = Status.STOPPED;
+	private List<StatusListener> fftServiceStatusListeners = new ArrayList<StatusListener>();
+	private List<StatusListener> fftAlertStatusListeners = new ArrayList<StatusListener>();
 
-	public void setFFTServiceStatus(FFTServiceStatus status) {
+	public void setFFTServiceStatus(Status status) {
 		this.fftServiceStatus = status;
-		for (ServiceStatusListener l: fftServiceStatusListeners) {
+		for (StatusListener l: fftServiceStatusListeners) {
 			l.onServiceStatusUpdate(status);
 		}
 	}
 
-	public FFTServiceStatus getFFTServiceStatus() {
+	public Status getFFTServiceStatus() {
 		return fftServiceStatus;
 	}
 
-	public void addFFTServiceStatusListener(ServiceStatusListener l) {
+	public void addFFTServiceStatusListener(StatusListener l) {
 		fftServiceStatusListeners.add(l);
 	}
 
-	public void removeFFTServiceStatusListener(ServiceStatusListener l) {
+	public void removeFFTServiceStatusListener(StatusListener l) {
 		fftServiceStatusListeners.remove(l);
+	}
+
+	public Status getFFTAlertStatus() {
+		return fftAlertStatus;
+	}
+
+	public void addFFTAlertStatusListener(StatusListener l) {
+		fftAlertStatusListeners.add(l);
+	}
+
+	public void removeFFTAlertStatusListener(StatusListener l) {
+		fftAlertStatusListeners.remove(l);
+	}
+
+	public void setFFTAlertStatus(Status status) {
+		this.fftAlertStatus = status;
+		for (StatusListener l: fftAlertStatusListeners) {
+			l.onServiceStatusUpdate(status);
+		}
 	}
 }
