@@ -46,7 +46,6 @@ public class FFTAlertActivity extends Activity {
 	}
 
 	private Runnable viewColorFlipper = new Runnable() {
-		@Override
 		public void run() {
 			if (viewState == 0) {
 				topArea.setBackgroundColor(Color.RED);

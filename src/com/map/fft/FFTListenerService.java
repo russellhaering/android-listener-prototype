@@ -95,7 +95,6 @@ public class FFTListenerService extends Service {
 	}
 
 	private Runnable micStopper = new Runnable() {
-		@Override
 		public void run() {
 			micRecord.stop();
 			micRecord.release();
@@ -112,7 +111,7 @@ public class FFTListenerService extends Service {
 		public void run() {
 			Looper.prepare();
 
-			db = new FFTSignalDatabase();
+			db = new FFTSignalDatabase(SAMPLE_RATE, CHUNK_SIZE);
 
 			micHandler = new Handler();
 
@@ -135,19 +134,18 @@ public class FFTListenerService extends Service {
 		}
 
 		private OnRecordPositionUpdateListener micBufferListener = new OnRecordPositionUpdateListener() {
-			@Override
 			public void onMarkerReached(AudioRecord recorder) {
 				// This method is required to exist
 			}
 
-			@Override
 			public void onPeriodicNotification(AudioRecord recorder) {
 				micRecord.read(audioBuffer, 0, BUFFER_SIZE);
-				Log.i(TAG, "Completed Read, First Byte = " + audioBuffer[0]);
 
 				for (int i = 0; i < BUFFER_SIZE; i += CHUNK_SIZE) {
 					int[] vals = FFT.realFFT(audioBuffer, i, CHUNK_SIZE);
 					FFTSignal sig = db.searchChunk(vals);
+
+					// If a known signal was detected, update the alert status
 					if (sig != null) {
 						Status alertStatus = ((FFTApplication) getApplicationContext()).getFFTAlertStatus();
 						if (alertStatus != Status.STARTED) {
@@ -155,23 +153,8 @@ public class FFTListenerService extends Service {
 							alertIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 							getApplication().startActivity(alertIntent);
 						}
-
-						/*
-						Notification notification = new Notification();
-						notification.icon = R.drawable.icon;
-						notification.when = System.currentTimeMillis();
-						notification.defaults |= Notification.DEFAULT_VIBRATE;
-						notification.defaults |= Notification.DEFAULT_LIGHTS;
-						Intent managerIntent = new Intent(FFTListenerService.this, FFTControlActivity.class);
-						notification.setLatestEventInfo(FFTListenerService.this,
-								"Detected " + sig.getName(),
-								"Detected " + sig.getName(),
-								PendingIntent.getActivity(FFTListenerService.this, 0, managerIntent, 0));
-						notificationManager.notify(0, notification);
-						*/
 					}
 				}
-				Log.i(TAG, "Done");
 			}
 		};
 	};
