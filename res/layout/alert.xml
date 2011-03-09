@@ -14,7 +14,7 @@
 		android:color="#FFFF"
 		android:textSize="52dip"
 		android:textStyle="bold"
-		android:text="Take Cover!" />
+		android:text="Siren Detected!" />
 	<View
 		android:id="@+id/alertBottomArea"
 		android:layout_width="fill_parent"
