@@ -8,8 +8,6 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.os.Vibrator;
 import android.view.View;
 import android.view.WindowManager;
