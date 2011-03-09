@@ -16,6 +16,9 @@ import android.os.Looper;
 import android.util.Log;
 
 public class FFTListenerService extends Service {
+	public static final String SIREN_BEGIN = "com.map.fft.intent.action.SIREN_BEGIN";
+	public static final String SIREN_END = "com.map.fft.intent.action.SIREN_END";
+
 	// Tag for log messages from this class
 	private static String TAG = "FFTListenerService";
 
@@ -106,6 +109,7 @@ public class FFTListenerService extends Service {
 	private Thread micThread = new Thread() {
 		private short audioBuffer[];
 		private FFTSignalDatabase db;
+		private int sirenTimeout = 0;
 
 		@Override
 		public void run() {
@@ -145,13 +149,17 @@ public class FFTListenerService extends Service {
 					int[] vals = FFT.realFFT(audioBuffer, i, CHUNK_SIZE);
 					FFTSignal sig = db.searchChunk(vals);
 
-					// If a known signal was detected, update the alert status
 					if (sig != null) {
-						Status alertStatus = ((FFTApplication) getApplicationContext()).getFFTAlertStatus();
-						if (alertStatus != Status.STARTED) {
-							Intent alertIntent = new Intent(FFTListenerService.this, FFTAlertActivity.class);
-							alertIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-							getApplication().startActivity(alertIntent);
+						if (sirenTimeout == 0) {
+							sendBroadcast(new Intent(SIREN_BEGIN));
+						}
+						sirenTimeout = 25;
+					} else {
+						if (sirenTimeout == 1) {
+							sendBroadcast(new Intent(SIREN_END));
+						}
+						if (sirenTimeout != 0) {
+							sirenTimeout--;
 						}
 					}
 				}

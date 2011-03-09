@@ -4,18 +4,19 @@ import android.util.Log;
 
 public class FFTSignalDatabase {
 	// How many hits in a row before detection
-	static final int DETECT_THRESHOLD = 4;
+	static final int DETECT_THRESHOLD = 7;
+	static final int MAX_COUNT = 12;
 
 	// Frequency range to search
 	static final int MIN_FREQ = 1200;
 	static final int MAX_FREQ = 2200;
 
 	// Minimum amplitude to trigger a 'hit'
-	static final int MIN_AMP = 200000;
+	static final int MIN_AMP = 150000;
 
 	// Maximum allowable change in frequency between two samples
 	// This is used to detect only relatively "smooth", continuous signals
-	static final int MAX_FREQ_DELTA = 100;
+	static final int MAX_FREQ_DELTA = 600;
 
 	private int currentCount = 0;
 	private int curFreq;
@@ -23,6 +24,7 @@ public class FFTSignalDatabase {
 	private final int bufferSize;
 	private final int minIndex;
 	private final int maxIndex;
+	private FFTSignal curSig = null;
 
 	public FFTSignalDatabase(int sampleRate, int bufferSize) {
 		this.sampleRate = sampleRate;
@@ -70,10 +72,21 @@ public class FFTSignalDatabase {
 			currentCount--;
 		}
 
-		if (currentCount >= DETECT_THRESHOLD) {
+		if (curSig != null) {
+			if (currentCount > 0) {
+				sig = curSig;
+			} else {
+				curSig = null;
+			}
+		} else if (currentCount >= DETECT_THRESHOLD) {
 			// Enough hits detected in a row, signal detected
-			sig = new FFTSignal("Probable Siren");
+			curSig = new FFTSignal("Probable Siren");
+			sig = curSig;
 			Log.i("FFTSignalDatabase", "Signal Detected at " + maxFreq + "HZ");
+
+			if (currentCount > MAX_COUNT) {
+				currentCount = MAX_COUNT;
+			}
 		}
 
 		return sig;

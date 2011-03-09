@@ -18,39 +18,44 @@ public class FFTControlActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+		setContentView(R.layout.main);
 
 		// Set up the control button
 		ctlButton = (Button) findViewById(R.id.ctlButton);
 		ctlButton.setOnClickListener(ctlButtonListener);
-		fftStatusListener.onServiceStatusUpdate(
-				(((FFTApplication) getApplicationContext()).getFFTServiceStatus()));
-		((FFTApplication) getApplicationContext()).addFFTServiceStatusListener(fftStatusListener);
+		fftStatusListener
+				.onServiceStatusUpdate((((FFTApplication) getApplicationContext())
+						.getFFTServiceStatus()));
+		((FFTApplication) getApplicationContext())
+				.addFFTServiceStatusListener(fftStatusListener);
 
-		listenerServiceIntent = new Intent(getApplicationContext(), FFTListenerService.class);
-    }
+		listenerServiceIntent = new Intent(getApplicationContext(),
+				FFTListenerService.class);
+	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		((FFTApplication) getApplicationContext()).removeFFTServiceStatusListener(fftStatusListener);
+		((FFTApplication) getApplicationContext())
+				.removeFFTServiceStatusListener(fftStatusListener);
 	}
 
 	private OnClickListener ctlButtonListener = new OnClickListener() {
 		public void onClick(View v) {
-			Status s = ((FFTApplication) getApplicationContext()).getFFTServiceStatus();
+			Status s = ((FFTApplication) getApplicationContext())
+					.getFFTServiceStatus();
 			switch (s) {
-				case STOPPED:
-					startService(listenerServiceIntent);
-					break;
-				case STARTED:
-					stopService(listenerServiceIntent);
-					break;
+			case STOPPED:
+				startService(listenerServiceIntent);
+				break;
+			case STARTED:
+				stopService(listenerServiceIntent);
+				break;
 			}
 		}
 	};
 
-    private StatusListener fftStatusListener = new StatusListener() {
+	private StatusListener fftStatusListener = new StatusListener() {
 		public void onServiceStatusUpdate(Status status) {
 			switch (status) {
 			case STOPPED:
@@ -61,5 +66,5 @@ public class FFTControlActivity extends Activity {
 				break;
 			}
 		}
-    };
+	};
 }
