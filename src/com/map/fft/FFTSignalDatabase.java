@@ -12,11 +12,11 @@ public class FFTSignalDatabase {
 	static final int MAX_FREQ = 2200;
 
 	// Minimum amplitude to trigger a 'hit'
-	static final int MIN_AMP = 150000;
+	static final int MIN_AMP = 200000;
 
 	// Maximum allowable change in frequency between two samples
 	// This is used to detect only relatively "smooth", continuous signals
-	static final int MAX_FREQ_DELTA = 600;
+	static final int MAX_FREQ_DELTA = 400;
 
 	private int currentCount = 0;
 	private int curFreq;
